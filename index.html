@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Five Hours of Security Issues</title>
+    <style>
+
+
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          user-select: none;
+        }
+
+        body {
+          background-color: #050805;
+          color: #33ff33;
+          font-family: 'Share Tech Mono', monospace;
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+
+
+        .crt-overlay {
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%),
+                      linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+          background-size: 100% 3px, 6px 100%;
+          pointer-events: none;
+          z-index: 100;
+        }
+
+        /* Top HUD */
+        header {
+          display: flex;
+          justify-content: space-between;
+          padding: 15px 30px;
+          border-bottom: 2px solid #1a5c1a;
+          background: #020c02;
+          text-shadow: 0 0 8px #33ff33;
+        }
+
+        .time-display {
+          font-size: 1.8rem;
+          font-weight: bold;
+        }
+
+        .status-badge {
+          font-size: 1.2rem;
+          color: #88ff88;
+        }
+
+
+        main {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          position: relative;
+        }
+
+        .terminal-window {
+          width: 800px;
+          max-width: 90vw;
+          border: 2px solid #33ff33;
+          background: rgba(0, 20, 0, 0.85);
+          padding: 25px;
+          border-radius: 4px;
+          box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+        }
+
+        .terminal-header {
+          border-bottom: 1px dashed #33ff33;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+          font-size: 1.4rem;
+          color: #a3ffa3;
+        }
+
+        .narrative-body {
+          font-size: 1.15rem;
+          line-height: 1.6;
+          margin-bottom: 30px;
+          min-height: 120px;
+        }
+
+        .options-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        button.choice-btn {
+          background: #041404;
+          border: 1px solid #33ff33;
+          color: #33ff33;
+          font-family: inherit;
+          font-size: 1.05rem;
+          padding: 14px 20px;
+          text-align: left;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        button.choice-btn:hover {
+          background: #33ff33;
+          color: #000;
+          box-shadow: 0 0 10px #33ff33;
+        }
+
+
+        #breach-screen {
+          display: none;
+          position: fixed;
+          top: 0; left: 0; width: 100vw; height: 100vh;
+          background: #300000;
+          color: #ff3333;
+          z-index: 200;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          text-align: center;
+          animation: flash 0.15s ease-in-out 3;
+        }
+
+        @keyframes flash {
+          0% { background: #ff0000; color: #000; }
+          100% { background: #300000; color: #ff3333; }
+        }
+
+        .breach-card {
+          max-width: 750px;
+          border: 3px solid #ff3333;
+          padding: 30px;
+          background: #110000;
+          box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+          text-align: left;
+        }
+
+        .breach-card h1 {
+          font-size: 2.2rem;
+          margin-bottom: 15px;
+          text-align: center;
+          text-shadow: 0 0 10px #ff3333;
+        }
+
+        .breach-detail {
+          margin: 15px 0;
+          font-size: 1.15rem;
+          line-height: 1.5;
+        }
+
+        .breach-detail strong {
+          color: #ffffff;
+        }
+
+        .restart-btn {
+          margin-top: 25px;
+          padding: 12px 25px;
+          font-size: 1.1rem;
+          background: #ff3333;
+          color: #000;
+          border: none;
+          font-family: inherit;
+          font-weight: bold;
+          cursor: pointer;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .restart-btn:hover {
+          background: #fff;
+        }
+    </style>
+</head>
+<body>
+<div class="crt-overlay"></div>
+
+<header>
+    <div>5 Hours of hospital Hack attempts</div>
+    <div class="time-display" id="clock">12:00 AM</div>
+    <div class="status-badge" id="threat-level">Data Safety: Secure</div>
+</header>
+
+<main>
+    <div class="terminal-window">
+        <div class="terminal-header" id="act-title">Loading...</div>
+        <div class="narrative-body" id="narrative-text">Loading...</div>
+        <div class="options-grid" id="options-container"></div>
+    </div>
+</main>
+
+
+<div id="breach-screen">
+    <div class="breach-card">
+        <h1>[ ! ] HACKER ACCESSED DATA</h1>
+        <div class="breach-detail" id="breach-vector"></div>
+        <div class="breach-detail" id="breach-stolen"></div>
+        <div class="breach-detail" id="breach-impact"></div>
+        <button class="restart-btn" onclick="restartGame()">Try better this time...</button>
+    </div>
+</div>
+
+<script>
+    // Audio Synthesizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBeep(freq = 440, type = 'sine', duration = 0.1) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playAlarm() {
+      playBeep(150, 'sawtooth', 0.6);
+      setTimeout(() => playBeep(120, 'sawtooth', 0.8), 200);
+    }
+
+    // The 6 parts
+    const acts = [
+      {
+        hour: "12:00 AM",
+        title: "Breach Attempt 1: THE OR-3 EMERGENCY CALL",
+        text: "The red console phone rings. A voice claims to be Dr. Robert Vance in OR-3: 'My workstation session timed out during a procedure and I cannot see the CT scans! Reset my password to Surg2026! right now or this person will die!'",
+        options: [
+          {
+            label: "[A] Verify identity: Hang up and call back the internal OR-3 intercom extension directly.",
+            correct: true
+          },
+          {
+            label: "[B] Reset Dr. Vance's Active Directory password over the phone immediately.",
+            correct: false,
+            vector: "Voice Phishing (Vishing) & Social Engineering using spoofed caller ID.",
+            stolen: "Active Directory user credentials for surgical staff.",
+            impact: "Attacker accessed clinical workstations and pulled confidential patient health records."
+          }
+        ]
+      },
+      {
+        hour: "01:00 AM",
+        title: "Breach Attempt 2: AUTHENTICATION FLOOD",
+        text: "Your mobile device starts buzzing incessantly. Within 30 seconds, you receive eight continuous update notifications for your system's security: 'Hey, I need you to approve this new update'.",
+        options: [
+          {
+            label: "[A] Tap 'Approve' to silence the continuous buzzing and clear the notification queue.",
+            correct: false,
+            vector: "MFA Fatigue Attack (Push Bombing).",
+            stolen: "High-privilege SOC Administrator Session Tokens.",
+            impact: "Adversary bypassed multi-factor authentication, took over admin controls, and silenced security alert logs."
+          },
+          {
+            label: "[B] Tap 'Deny', mark as suspicious fraud, and revoke pending administrative session tokens.",
+            correct: true
+          }
+        ]
+      },
+      {
+        hour: "02:00 AM",
+        title: "Breach Attempt 3: THE SERVER ROOM CORRIDOR",
+        text: "During a physical inspection walk, you find an unattended 256GB USB-C flash drive outside the server room door labeled: 'HR_Confidential_Salary_Reviews_2026.xlsx'.",
+        options: [
+          {
+            label: "[A] Insert the drive into your SOC laptop to inspect file metadata and locate the owner.",
+            correct: false,
+            vector: "Malicious Hardware Injection (BadUSB / HID Keystroke Injection).",
+            stolen: "Local Windows SAM password hashes and cached browser session keys.",
+            impact: "The drive simulated a keyboard, fired off Powershell scripts in seconds, and opened a reverse shell to a C2 server."
+          },
+          {
+            label: "[B] Bag the drive in an anti-static evidence pouch for physical forensics without plugging it in.",
+            correct: true
+          }
+        ]
+      },
+      {
+        hour: "03:00 AM",
+        title: "Breach Attempt 4: CRITICAL VENDOR FIX",
+        text: "You receive an urgent email from 'support@Seimens-Health.net': 'EMERGENCY: MRI systems vulnerable to zero-day RCE. Scan this QR code with your corporate tablet to download patch Hotfix-KB89.exe.'",
+        options: [
+          {
+            label: "[A] Inspect email headers, detect domain typosquatting, block sender IP, and alert staff.",
+            correct: true
+          },
+          {
+            label: "[B] Scan the QR code on your tablet and download the update package to prevent downtime.",
+            correct: false,
+            vector: "QR Code Phishing & Typosquatted Domain Attack.",
+            stolen: "Enterprise root certificates and internal VPN configurations.",
+            impact: "Trojanized executable installed a remote access tool (RAT) directly into the Radiology systems."
+          }
+        ]
+      },
+      {
+        hour: "04:00 AM",
+        title: "Breach Attempt 5: THE RANSOMWARE EXFILTRATION",
+        text: "Outbound internet traffic spikes to 80 GB/sec heading to an unknown overseas IP. A file pop-up appears on the central file server: 'READ_ME_TO_DECRYPT_FILES.txt'.",
+        options: [
+          {
+            label: "[A] Email the extortionist's address to negotiate extra time before shutting off any servers.",
+            correct: false,
+            vector: "Double-Extortion Ransomware Deployment.",
+            stolen: "Complete Electronic Health Records, billing cards, and employee files.",
+            impact: "All hospital volumes were encrypted with AES-256; patient data was leaked on the dark web, forcing emergency services to shut down."
+          },
+          {
+            label: "[B] Sever the hospital's primary internet uplink immediately and restore from offline immutable backups.",
+            correct: true
+          }
+        ]
+      },
+      {
+        hour: "05:00 AM",
+        title: "Breach Attempt 6: THE GHOST PERSONNEL",
+        text: "You get a notification that an employee signed into a company PC(One that is in the office). You personally said goodnight to that person when you started your shift and you know they are at home right now.'.",
+        options: [
+          {
+            label: "[A] They probably came back to work to finish something",
+            correct: false,
+            vector: "Leaked password remote sign in",
+            stolen: "All data the employee had access to including confidential Patient Files and employee imformation",
+            impact: "Mass amounts of Patient data was stolen and sold on the black market, employee data was leaked, including addresses, credit card info, and full legal names."
+          },
+          {
+            label: "[B] Remotely shut down the account access, and lock the account until further notice. Notify the employee and other staff",
+            correct: true
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+
+    function renderAct() {
+      if (currentActIndex >= acts.length) {
+        // Player survived all 6 attempts
+        document.getElementById('clock').innerText = "06:00 AM";
+        document.getElementById('threat-level').innerText = "STATUS: SAFE - SHIFT COMPLETED";
+        document.getElementById('act-title').innerText = "SHIFT CONCLUDED - THREATS NEUTRALIZED";
+        document.getElementById('narrative-text').innerText = "The morning shift arrives. You preserved hospital integrity, blocked all exfiltration attempts, and thwarted a major APT attack. Zero patient records were compromised.";
+        document.getElementById('options-container').innerHTML = `
+          <button class="choice-btn" onclick="restartGame()">PLAY AGAIN</button>
+        `;
+        return;
+      }
+
+      const act = acts[currentActIndex];
+      document.getElementById('clock').innerText = act.hour;
+      document.getElementById('act-title').innerText = act.title;
+      document.getElementById('narrative-text').innerText = act.text;
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      act.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerText = opt.label;
+        btn.onclick = () => handleChoice(opt);
+        container.appendChild(btn);
+      });
+    }
+
+    function handleChoice(option) {
+      if (option.correct) {
+        playBeep(600, 'sine', 0.15);
+        currentActIndex++;
+        renderAct();
+      } else {
+        triggerBreach(option);
+      }
+    }
+
+    function triggerBreach(failData) {
+      playAlarm();
+      document.getElementById('breach-vector').innerHTML = `<strong>Attack Vector:</strong> ${failData.vector}`;
+      document.getElementById('breach-stolen').innerHTML = `<strong>Data Compromised:</strong> ${failData.stolen}`;
+      document.getElementById('breach-impact').innerHTML = `<strong>Security Impact:</strong> ${failData.impact}`;
+      document.getElementById('breach-screen').style.display = 'flex';
+    }
+
+    function restartGame() {
+      playBeep(300, 'triangle', 0.1);
+      document.getElementById('breach-screen').style.display = 'none';
+      currentActIndex = 0;
+      renderAct();
+    }
+
+    // Start game on load
+    renderAct();
+</script>
+</body>
+</html>
